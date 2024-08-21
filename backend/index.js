@@ -16,13 +16,10 @@ app.post('/api/register', async (req, res) => {
     const { firstName, lastName, email, phone } = req.body;
 
     const payload = {
-      event: 'Hubspot slack trigger',
-      payload: {
         firstName,
         lastName,
         email,
         phone,
-      },
     };
 
 
@@ -35,13 +32,19 @@ app.post('/api/register', async (req, res) => {
           'x-api-key': process.env.API_KEY,
           linked_account_id: process.env.LINKED_ACCOUNT_ID,
           slug: process.env.SLUG,
+          sync_execution: true
         },
       }
     );
 
-    console.log(response.data)
+    // console.log(response.data)
+    console.log("---------------------------")
+    const obj=JSON.parse(response.data.return_value)
+    console.log(obj)
+    const resObj={isSuccess:obj.isSuccess}
+    if(!obj.isSuccess) resObj["error"]=JSON.parse(obj.error.message).message
 
-    res.status(response.status).json(response.data);
+    res.status(obj.isSuccess ? response.status :400 ).json(resObj);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An error occurred while processing your request.' });
